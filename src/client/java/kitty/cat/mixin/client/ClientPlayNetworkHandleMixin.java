@@ -8,7 +8,6 @@ import kitty.cat.features.huds.SupplyHud;
 import kitty.cat.features.kuudra.*;
 import kitty.cat.features.misc.ChatMacros;
 import kitty.cat.features.misc.FarmHelper;
-import kitty.cat.features.misc.Pests;
 import kitty.cat.features.visual.ArrowTracers;
 import kitty.cat.utils.KuudraUtils;
 import kitty.cat.utils.LocationUtils;

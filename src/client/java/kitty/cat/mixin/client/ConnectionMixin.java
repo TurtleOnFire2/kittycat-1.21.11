@@ -27,7 +27,6 @@ public class ConnectionMixin {
             Schedule.INSTANCE.tickServer();
             PearlWaypoints.INSTANCE.serverTick();
             SupplyHud.INSTANCE.serverTick();
-            FarmHelper.INSTANCE.serverTick();
         }
     }
 
