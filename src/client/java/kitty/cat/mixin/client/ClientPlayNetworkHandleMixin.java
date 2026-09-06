@@ -70,6 +70,11 @@ public class ClientPlayNetworkHandleMixin {
         };
     }
 
+    @Inject(method = "handleContainerSetSlot", at = @At("HEAD"))
+    void handleContainerSetSlot(ClientboundContainerSetSlotPacket packet, CallbackInfo ci) {
+        Stun.INSTANCE.handleSetSlot(packet);
+    }
+
     @Inject(method = "handleMovePlayer(Lnet/minecraft/network/protocol/game/ClientboundPlayerPositionPacket;)V", at = @At("TAIL"))
     void handleMovePlayer(ClientboundPlayerPositionPacket packet, CallbackInfo ci) {
         RendMacro.INSTANCE.onPositionChange(packet);

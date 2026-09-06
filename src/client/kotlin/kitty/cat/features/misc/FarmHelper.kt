@@ -64,7 +64,14 @@ object FarmHelper : Feature("Farm Helper", "", Categories.Category.MISC) {
 
         lastPestSpawn = 0
 
-        if (mc.player?.onGround() != true || !autoWarp.value) return
+        if (!autoWarp.value) return
+
+        if (mc.player?.onGround() != true) {
+            schedule(20) {
+                handleChat(unformatted)
+            }
+            return
+        }
 
         schedule(delay(), true) {
             mc.player!!.connection.sendCommand("sethome")

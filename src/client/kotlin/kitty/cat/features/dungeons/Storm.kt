@@ -182,7 +182,7 @@ object Storm: Feature("Storm", "Stuff for Storm Phase", Categories.Category.DUNG
     fun useItem(player: Player, interactionHand: InteractionHand, result: InteractionResult) {
         if (player.mainHandItem.uuid() == "STARRED_BONE_BOOMERANG" && necron && autoSwapCritItem.value && player.y > 20) {
             if (autoSwapArmor.value) {
-                mc.connection?.sendCommand("wd")
+                mc.connection?.sendCommand("loadout")
                 swapping = true
             }
             schedule(swapDelay.value) {
@@ -211,7 +211,7 @@ object Storm: Feature("Storm", "Stuff for Storm Phase", Categories.Category.DUNG
             useTime++
         } else {
             if (useTime >= 20 && autoSwapArmor.value && maxor) {
-                mc.connection?.sendCommand("wd")
+                mc.connection?.sendCommand("loadout")
                 swapping = true
             }
             useTime = 0

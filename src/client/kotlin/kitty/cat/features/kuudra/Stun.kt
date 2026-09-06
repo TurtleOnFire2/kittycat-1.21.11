@@ -4,7 +4,6 @@ import kitty.cat.KittycatClient.mc
 import kitty.cat.features.Feature
 import kitty.cat.gui.categories.Categories
 import kitty.cat.render.world.Render3D.renderBoxBounds
-import kitty.cat.utils.Chat
 import kitty.cat.utils.KuudraUtils.build
 import kitty.cat.utils.KuudraUtils.stun
 import kitty.cat.utils.Schedule.schedule
@@ -15,6 +14,8 @@ import kitty.cat.utils.renderPos
 import kitty.cat.utils.uuid
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket
 import net.minecraft.world.InteractionHand
@@ -22,6 +23,7 @@ import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.phys.Vec3
+import org.lwjgl.glfw.GLFW
 import java.awt.Color
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -29,6 +31,7 @@ import kotlin.math.sqrt
 
 object Stun : Feature("Stun", "", Categories.Category.KUUDRA) {
     val autoOpenShop = booleanSetting("Auto open shop", false)
+    val autoSetCursor = booleanSetting("Auto set cursor on shop open", false)
     val autoCloseShop = booleanSetting("Auto close shop", false)
     val noBlind = booleanSetting("No blindness", false)
     val stunWaypoint = booleanSetting("Stun waypoint", false)
@@ -52,7 +55,7 @@ object Stun : Feature("Stun", "", Categories.Category.KUUDRA) {
             if (!stun() && !build()) return@register
 
             if (autoOpenShop.value) {
-                ctx.renderBoxBounds(-74.0, 79.0, -104.0, -70.0, 79.05, -102.0, Color.CYAN)
+                ctx.renderBoxBounds(-75.0, 79.0, -106.0, -70.0, 79.05, -101.0, Color.CYAN)
             }
 
             if (stunWaypoint.value && !podDestroyed) {
@@ -151,7 +154,7 @@ object Stun : Feature("Stun", "", Categories.Category.KUUDRA) {
                 )
         )?.blockPos ?: return
 
-        if (pos.x in -74..-70 && pos.y == 78 && pos.z in -104..-102) {
+        if (pos.x in -75..-70 && pos.y == 78 && pos.z in -106..-101) {
             val slot = hotbarSlotFromID("KUUDRA_SHOP_ITEM") ?: return
             player.inventory.selectedSlot = slot
             schedule(1) {
@@ -176,7 +179,7 @@ object Stun : Feature("Stun", "", Categories.Category.KUUDRA) {
 
             var slot: Int? = null
 
-            for (i in 1..7) {
+            for (i in 0..7) {
                 val lore = mc.player!!.inventory.getItem(i).lore
 
                 lore.forEach {
@@ -208,5 +211,27 @@ object Stun : Feature("Stun", "", Categories.Category.KUUDRA) {
         if (!purchased) return false
 
         return autoCloseShop.value
+    }
+
+    fun handleSetSlot(packet: ClientboundContainerSetSlotPacket) {
+        if (packet.item.hoverName.string != "Human Cannonball" || !autoSetCursor.value) return
+
+        val screen = mc.screen as? AbstractContainerScreen<*> ?: return
+        if (packet.containerId != screen.menu.containerId) return
+        if (packet.slot !in screen.menu.slots.indices) return
+
+        val slot = screen.menu.getSlot(packet.slot)
+
+        val relativeX = slot.x
+        val relativeY = slot.y
+
+        val guiX = screen.leftPos + relativeX + 8.0
+        val guiY = screen.topPos + relativeY + 8.0
+
+        val window = mc.window
+        val windowX = guiX * window.screenWidth / window.guiScaledWidth
+        val windowY = guiY * window.screenHeight / window.guiScaledHeight
+
+        GLFW.glfwSetCursorPos(window.handle(), windowX, windowY)
     }
 }
