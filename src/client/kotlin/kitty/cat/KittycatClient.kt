@@ -30,6 +30,7 @@ import kitty.cat.features.kuudra.SafeSpots
 import kitty.cat.features.kuudra.Stun
 import kitty.cat.features.kuudra.Supplies
 import kitty.cat.features.kuudra.SupplyCheats
+import kitty.cat.features.misc.FarmHelper
 import kitty.cat.features.misc.Safari
 import kitty.cat.features.settings.KeybindSetting
 import kitty.cat.render.nanovg.NVGPIPRenderer
@@ -313,6 +314,7 @@ object KittycatClient : ClientModInitializer {
 		RendDamage.register()
 		SupplyCheats.register()
 		SafeSpots.register()
+		FarmHelper.register()
 
 		BackboneHud
 		SupplyHud
