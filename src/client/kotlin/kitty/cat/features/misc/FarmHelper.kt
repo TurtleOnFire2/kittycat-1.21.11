@@ -7,6 +7,8 @@ import kitty.cat.utils.Chat
 import kitty.cat.utils.Schedule.schedule
 import kitty.cat.utils.clickSlot
 import kitty.cat.utils.getLoadoutIndex
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLevelEvents
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.world.entity.decoration.ArmorStand
@@ -28,12 +30,29 @@ object FarmHelper : Feature("Farm Helper", "", Categories.Category.MISC) {
 
     private val pestSpawnRegex = Regex("YUCK! (\\d) .+ Pest have spawned in Plot - (.+)!")
 
-    var lastPestSpawn = 0
+    var lastPestSpawn = -1
     var toClick = -1
 
     var pests = 9999
 
     val allPests = Regex("""\b(Beetle|Cricket|Dragonfly|Earthworm|Firefly|Fly|Locust|Mite|Mosquito|Moth|Praying Mantis|Rat|Slug)\b""")
+
+    fun register() {
+        ClientTickEvents.END_CLIENT_TICK.register { client ->
+            lastPestSpawn++
+
+            val amount = pestCooldown.value.toInt() * 20
+
+            if (lastPestSpawn - amount == -20) {
+                if (autoLoadout.value) mc.connection?.sendCommand("loadout")
+                toClick = spawnSlot.value.toInt()
+            }
+        }
+        ClientLevelEvents.AFTER_CLIENT_LEVEL_CHANGE.register { _, level ->
+            lastPestSpawn = -1
+        }
+    }
+
     fun handleChat(unformatted: String) {
         if (!enabled) return
 
@@ -65,17 +84,6 @@ object FarmHelper : Feature("Farm Helper", "", Categories.Category.MISC) {
                     }
                 }
             }
-        }
-    }
-
-    fun serverTick() {
-        lastPestSpawn++
-
-        val amount = pestCooldown.value.toInt() * 20
-
-        if (lastPestSpawn - amount == -20) {
-            if (autoLoadout.value) mc.connection?.sendCommand("loadout")
-            toClick = spawnSlot.value.toInt()
         }
     }
 
